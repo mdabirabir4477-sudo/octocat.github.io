@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#080d1b">
+<title>LAMU AI</title>
+<style>
+:root{color-scheme:dark;--bg:#080d1b;--panel:#111a2d;--line:#26334d;--text:#eef4ff;--muted:#9caecb;--accent:#7c5cff}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% 0,#17264a 0,transparent 48%),var(--bg);color:var(--text);font:16px system-ui,-apple-system,"Noto Sans Bengali",sans-serif;min-height:100dvh}
+.wrap{max-width:760px;margin:auto;padding:18px 14px 28px}.top{display:flex;align-items:center;justify-content:space-between}.brand{font-size:22px;font-weight:800;letter-spacing:.4px}.brand span{color:#a997ff}.status{font-size:12px;color:#9be7c1;border:1px solid #285a49;border-radius:20px;padding:6px 10px}
+.orbarea{display:flex;justify-content:center;padding:28px 0 18px}.orb{width:132px;height:132px;border-radius:50%;background:radial-gradient(circle at 35% 28%,#b7aaff,#7654ff 35%,#232b75 70%,#111a35);box-shadow:0 0 30px #6d52ff55, inset 0 0 22px #d8d0ff55;position:relative}.orb:after{content:"";position:absolute;inset:13px;border:1px solid #ffffff45;border-radius:50%}.orb.active{animation:pulse 1.5s infinite}@keyframes pulse{50%{transform:scale(1.07);box-shadow:0 0 55px #7c5cffaa}}
+h1{text-align:center;margin:0;font-size:26px} .sub{text-align:center;color:var(--muted);margin:6px 0 20px;font-size:14px}
+.chat{background:#0e1729;border:1px solid var(--line);border-radius:20px;min-height:240px;max-height:48dvh;overflow:auto;padding:14px;display:flex;flex-direction:column;gap:12px}
+.msg{max-width:90%;padding:11px 13px;border-radius:15px;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.5}.bot{align-self:flex-start;background:#18243a;border:1px solid #293750}.user{align-self:flex-end;background:#4d3ab0}
+.controls{display:flex;gap:9px;margin-top:12px}.entry{flex:1;min-width:0;background:#111a2d;border:1px solid var(--line);border-radius:14px;color:var(--text);padding:13px;font:inherit;outline:none}.btn{border:0;border-radius:14px;background:#6b50e8;color:white;padding:0 16px;font:inherit;font-weight:700;cursor:pointer}.mic{display:block;margin:12px auto 0;border:1px solid #4c3f93;background:#211b45;color:#e5ddff;border-radius:50px;padding:12px 22px;font:inherit;cursor:pointer}.row{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:14px 0}.chip{border:1px solid var(--line);background:#111a2d;color:#cbd6ed;border-radius:20px;padding:8px 12px;font-size:13px;cursor:pointer}.foot{color:#7e91b2;text-align:center;font-size:12px;margin-top:14px}.settings{margin-top:14px;background:#10182a;border:1px solid var(--line);border-radius:14px;padding:12px}.settings summary{cursor:pointer;color:#cbd6ed}.settings input{width:100%;margin-top:10px;background:#080d1b;color:#fff;border:1px solid var(--line);border-radius:10px;padding:10px}.small{color:#91a2c0;font-size:12px;line-height:1.5}
+</style>
+</head>
+<body><main class="wrap">
+<header class="top"><div class="brand">✦ <span>LAMU</span> AI</div><div class="status" id="status">● প্রস্তুত</div></header>
+<div class="orbarea"><div class="orb" id="orb"></div></div>
+<h1>আমি লামু</h1><p class="sub">বাংলায় বলো, আমি শুনছি।</p>
+<section class="chat" id="chat" aria-live="polite"><div class="msg bot">হ্যালো! আমি LAMU। নিচে লিখে বা মাইক্রোফোনে কথা বলে শুরু করো।</div></section>
+<div class="controls"><input class="entry" id="entry" placeholder="লামুকে কিছু বলো..." autocomplete="off"><button class="btn" id="send">পাঠাও</button></div>
+<button class="mic" id="mic">🎙️ কথা বলো</button>
+<div class="row"><button class="chip" data-q="আমাকে একটি সুন্দর শুভেচ্ছা বার্তা লিখে দাও">✍️ লেখা</button><button class="chip" data-q="১০০০ টাকার ১৫ শতাংশ কত?">🧮 হিসাব</button><button class="chip" data-q="Hello, how are you? বাংলায় অনুবাদ করো">🌐 অনুবাদ</button><button class="chip" id="clear">🧹 চ্যাট মুছো</button></div>
+<details class="settings"><summary>⚙️ সেটিংস (AI সার্ভার)</summary><input id="api" placeholder="Backend URL, যেমন https://your-server.example/api/chat"><p class="small">নিজস্ব AI উত্তর পেতে Backend URL দিন। API secret কখনো এই ব্রাউজারে রাখবেন না। URL ফাঁকা থাকলে LAMU ডেমো উত্তর ও স্থানীয় কিছু কাজ করবে।</p><button class="chip" id="save">URL সংরক্ষণ</button></details>
+<p class="foot">ভয়েস ইনপুট Chrome-এ সমর্থিত হলে কাজ করবে। প্রথমবার Microphone permission Allow করতে হবে।</p>
+</main>
+<script>
+const $=id=>document.getElementById(id), chat=$('chat'), entry=$('entry'), orb=$('orb');
+let apiUrl=localStorage.getItem('lamu_api')||''; $('api').value=apiUrl;
+function add(text,who='bot'){let d=document.createElement('div');d.className='msg '+who;d.textContent=text;chat.appendChild(d);chat.scrollTop=chat.scrollHeight}
+function setStatus(s,on=false){$('status').textContent='● '+s;orb.classList.toggle('active',on)}
+function speak(text){if(!('speechSynthesis'in window))return; speechSynthesis.cancel();let u=new SpeechSynthesisUtterance(text);u.lang=/[অ-৿]/.test(text)?'bn-BD':'en-US';u.rate=1; speechSynthesis.speak(u)}
+function localAnswer(q){let s=q.toLowerCase();if(/হ্যালো|hello|হাই|hi/.test(s))return 'হ্যালো! আমি লামু। কীভাবে সাহায্য করতে পারি?';let m=q.match(/(\d+(?:\.\d+)?)\s*(?:টাকার?\s*)?(?:এর\s*)?(\d+(?:\.\d+)?)\s*শতাংশ/);if(m)return `${m[1]} এর ${m[2]}% = ${(Number(m[1])*Number(m[2])/100).toFixed(2)}।`;if(/অনুবাদ|translate/.test(s))return 'অনুবাদ করতে যে বাক্যটি অনুবাদ করতে চাও, সেটি লিখে দাও।';if(/সময়|সময়|time/.test(s))return 'তোমার ফোনের বর্তমান সময়: '+new Date().toLocaleTimeString('bn-BD');return 'আমি এখন ডেমো মোডে আছি। পূর্ণ AI কথোপকথনের জন্য Settings-এ তোমার নিরাপদ Backend URL যুক্ত করো।'}
+async function send(q){q=(q||entry.value).trim();if(!q)return;entry.value='';add(q,'user');setStatus('ভাবছি…',true);try{if(apiUrl){let r=await fetch(apiUrl,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:q})});if(!r.ok)throw Error('Server '+r.status);let data=await r.json();let answer=data.reply||data.message||data.answer||'সার্ভার থেকে উত্তর পাওয়া যায়নি।';add(answer);speak(answer)}else{let answer=localAnswer(q);add(answer);speak(answer)}}catch(e){let answer='AI সার্ভারে সংযোগ হয়নি। Backend URL ও সার্ভার চালু আছে কি না পরীক্ষা করো।';add(answer)}finally{setStatus('প্রস্তুত')}}
+$('send').onclick=()=>send();entry.addEventListener('keydown',e=>{if(e.key==='Enter')send()});
+document.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>send(b.dataset.q));
+$('clear').onclick=()=>{chat.innerHTML='';add('চ্যাট মুছে ফেলা হয়েছে। আবার শুরু করো।')};
+$('save').onclick=()=>{apiUrl=$('api').value.trim();localStorage.setItem('lamu_api',apiUrl);add('Backend URL এই ব্রাউজারে সংরক্ষণ করা হয়েছে।');};
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+$('mic').onclick=()=>{if(!SR){add('এই ব্রাউজারে Speech Recognition সমর্থিত নয়। Chrome ব্যবহার করে দেখো।');return}
+let rec=new SR();rec.lang='bn-BD';rec.interimResults=false;rec.maxAlternatives=1;rec.onstart=()=>setStatus('শুনছি…',true);rec.onresult=e=>{let text=e.results[0][0].transcript;entry.value=text;send(text)};rec.onerror=e=>{setStatus('মাইক্রোফোন সমস্যা');add('ভয়েস কাজ করেনি: '+e.error+'. Microphone permission Allow করো।')};rec.onend=()=>setStatus('প্রস্তুত');try{rec.start()}catch(e){setStatus('প্রস্তুত')}};
+</script></body></html>
